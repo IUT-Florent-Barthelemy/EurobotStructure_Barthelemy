@@ -56,7 +56,7 @@ namespace RobotEurobot2Roues
             xBoxManette = new XBoxControllerNS.XBoxController(robotId);
             strategyManager = new StrategyEurobot(robotId, teamId, "224.16.32.79");
             localWorldMapManager = new LocalWorldMapManager(robotId, teamId, bypassMulticast: false);
-            positioning2Wheels = new Positioning2Wheels();
+            positioning2Wheels = new Positioning2Wheels(robotId);
             trajectoryGenerator = new TrajectoryGeneratorNonHolonome(robotId);
 
             /// Création des liens entre module, sauf depuis et vers l'interface graphique           
@@ -74,7 +74,8 @@ namespace RobotEurobot2Roues
             msgEncoder.OnMessageEncodedEvent += usbDriver.SendUSBMessage;                                       // Envoi des messages en USB depuis le message encoder
 
             robotMsgProcessor.OnPolarOdometrySpeedFromRobotEvent += positioning2Wheels.OnOdometryRobotSpeedReceived;        //Envoi des vitesses reçues de l'embarqué au module de calcul de positionnement
-            positioning2Wheels.OnCalculatedLocationEvent += trajectoryGenerator.OnPhysicalPositionReceived;                 //Envoi du positionnement calculé au module de génération de trajectoire
+            positioning2Wheels.OnCalculatedLocationEvent += trajectoryGenerator.OnPhysicalPositionReceived;
+            positioning2Wheels.OnCalculatedLocationEvent += localWorldMapManager.OnPhysicalPositionReceived;//Envoi du positionnement calculé au module de génération de trajectoire
             trajectoryGenerator.OnGhostLocationEvent += localWorldMapManager.OnGhostLocationReceived;
 
             strategyManager.InitStrategy(); //à faire après avoir abonné les events !
@@ -107,6 +108,9 @@ namespace RobotEurobot2Roues
             /// Principe général des events :
             /// Sur evenement xx        -->>        Action a effectuer
             /// 
+
+            //affichage de la position du robot sur le terrain
+            localWorldMapManager.OnLocalWorldMapForDisplayOnlyEvent += interfaceRobot.OnLocalWorldMapStrategyEvent;
 
             /// Affichage des évènements en provenance du uC
             robotMsgGenerator.OnMessageToDisplaySpeedPolarPidSetupEvent += interfaceRobot.OnMessageToDisplayPolarSpeedPidSetupReceived;
