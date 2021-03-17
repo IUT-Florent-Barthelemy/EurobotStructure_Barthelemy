@@ -104,7 +104,7 @@
             </GroupBox>
         </Grid>
         <Viewbox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="1" Stretch="Uniform" MaxWidth="900" MaxHeight="800" >
-            <ext:LocalWorldMapDisplay x:Name="worldMapDisplayStrategy" Padding="5" Width="300" Height="200" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Loaded="worldMapDisplayStrategy_Loaded" ></ext:LocalWorldMapDisplay>
+            <ext:LocalWorldMapDisplay x:Name="worldMapDisplayStrategy" Padding="5" Width="300" Height="200" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
         </Viewbox>
         <Viewbox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="1" Stretch="Uniform" MaxWidth="900" MaxHeight="800"   >
             <ext:LocalWorldMapDisplay x:Name="worldMapDisplayWaypoint" Padding="5" Width="300" Height="200" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ></ext:LocalWorldMapDisplay>

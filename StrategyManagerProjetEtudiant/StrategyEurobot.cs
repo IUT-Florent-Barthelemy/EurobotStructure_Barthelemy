@@ -26,8 +26,8 @@ namespace StrategyManagerProjetEtudiantNS
 
         public StrategyEurobot(int robotId, int teamId, string multicastIpAddress) : base(robotId, teamId, multicastIpAddress)
         {
-            taskDemoMove = new TaskDemoMove(this);
-            taskDemoMessage = new TaskDemoMessage(this);
+            //taskDemoMove = new TaskDemoMove(this);
+            //taskDemoMessage = new TaskDemoMessage(this);
         }
 
         public override void InitStrategy()

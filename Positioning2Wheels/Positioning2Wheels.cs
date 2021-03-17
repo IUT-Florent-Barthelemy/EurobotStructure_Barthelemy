@@ -28,7 +28,9 @@ namespace Positioning2WheelsNS
 
             ActualLocation.X += ActualLocation.Vx * Tech_Sec;
             ActualLocation.Y += ActualLocation.Vy * Tech_Sec;
-            ActualLocation.Y += ActualLocation.Vtheta * Tech_Sec;
+            ActualLocation.Theta += ActualLocation.Vtheta * Tech_Sec;
+
+            Console.WriteLine("Location Vx = {0}", ActualLocation.Vx);
 
             OnCalculatedLocation(robotID, ActualLocation);
         }

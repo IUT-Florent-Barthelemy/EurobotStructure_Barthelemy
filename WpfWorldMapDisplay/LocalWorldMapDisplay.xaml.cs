@@ -864,6 +864,8 @@ namespace WpfWorldMapDisplay
             p.backgroundColor = System.Drawing.Color.FromArgb(0xFF, 0xA0, 0xA0, 0xA0);
             PolygonTerrainSeries.AddOrUpdatePolygonExtended((int)Terrain.BaliseGaucheBas, p);
 
+            
+
         }
 
         void InitCachanField()
