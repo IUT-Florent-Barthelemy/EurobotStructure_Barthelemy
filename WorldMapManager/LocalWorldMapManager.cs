@@ -93,6 +93,7 @@ namespace WorldMapManager
             if (localWorldMap.RobotId == e.RobotId)
             {
                 localWorldMap.robotGhostLocation = e.Location;
+                OnLocalWorldMapForDisplayOnly(localWorldMap);
             }
         }
 
@@ -103,6 +104,7 @@ namespace WorldMapManager
             if (localWorldMap.RobotId == e.RobotId)
             {
                 localWorldMap.destinationLocation = e.Location;
+                OnLocalWorldMapForDisplayOnly(localWorldMap);
             }
         }
 
@@ -113,6 +115,7 @@ namespace WorldMapManager
             if (localWorldMap.RobotId == e.RobotId)
             {
                 localWorldMap.robotRole = e.Role;
+                OnLocalWorldMapForDisplayOnly(localWorldMap);
             }
         }
 
@@ -133,6 +136,7 @@ namespace WorldMapManager
             if (localWorldMap.RobotId == e.RobotId)
             {
                 localWorldMap.messageDisplay = e.Message;
+                OnLocalWorldMapForDisplayOnly(localWorldMap);
             }
         }
 
@@ -143,6 +147,7 @@ namespace WorldMapManager
             if (localWorldMap.RobotId == e.RobotId)
             {
                 localWorldMap.playingSide = e.PlaySide;
+                OnLocalWorldMapForDisplayOnly(localWorldMap);
             }
         }
 
@@ -187,6 +192,7 @@ namespace WorldMapManager
                 catch { };
 
                 localWorldMap.lidarMap = listPtLidar;
+                OnLocalWorldMapForDisplayOnly(localWorldMap);
             }
         }
         public void OnProcessedLidarDataReceived(object sender, EventArgsLibrary.RawLidarArgs e)
@@ -209,6 +215,7 @@ namespace WorldMapManager
                 catch { };
 
                 localWorldMap.lidarMapProcessed = listPtLidar;
+                OnLocalWorldMapForDisplayOnly(localWorldMap);
             }
         }
 

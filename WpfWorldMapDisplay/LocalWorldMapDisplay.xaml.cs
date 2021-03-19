@@ -261,7 +261,7 @@ namespace WpfWorldMapDisplay
                         ghostShape.polygon.Points.Add(new Point(0.14, 0.14));
                         ghostShape.polygon.Points.Add(new Point(-0.14, 0.14));
                         ghostShape.polygon.Points.Add(new Point(-0.14, -0.14));
-                        ghostShape.backgroundColor = System.Drawing.Color.FromArgb(20, 0, 255, 0);
+                        ghostShape.backgroundColor = System.Drawing.Color.Cyan;
                         ghostShape.borderColor = System.Drawing.Color.Black;
 
                         RobotDisplay rd = new RobotDisplay(robotShape, ghostShape, playerName);

@@ -12,7 +12,7 @@ namespace TrajectoryGeneratorNonHolonomeNS
     {
         int robotId;
 
-        double samplingFreq;
+        double samplingPeriod = 1/50f;
 
         Location currentLocationRefTerrain;
         Location wayPointLocation;
@@ -24,11 +24,26 @@ namespace TrajectoryGeneratorNonHolonomeNS
         AsservissementPID PID_Position_Lineaire;
         AsservissementPID PID_Position_Angulaire;
 
+
+        enum States
+        {
+            idle,
+            rotation_1,
+            linear,
+            rotation2
+        }
+
+        States state = States.rotation_1;
+
         public TrajectoryGeneratorNonHolonome(int id)
         {
             robotId = id;
             InitRobotPosition(0, 0, 0);
             InitPositionPID();
+
+            //********************************************************SET NEW POSITION
+            wayPointLocation = new Location(1, 2, 0, 0, 0, 0);
+
 
             //Initialisation des vitesse et accélérations souhaitées
             accelLineaire = 0.5; //en m.s-2
@@ -53,6 +68,12 @@ namespace TrajectoryGeneratorNonHolonomeNS
             PIDPositionReset();
         }
 
+        public void SetDestination(object sender, LocationArgs destination)
+        {
+            wayPointLocation = destination.Location;
+            state = States.rotation_1;
+        }
+
         public void OnPhysicalPositionReceived(object sender, LocationArgs e)
         {
             if (robotId == e.RobotId)
@@ -66,6 +87,30 @@ namespace TrajectoryGeneratorNonHolonomeNS
         void CalculateGhostPosition()
         {
             //A remplir
+            switch(state)
+            {
+                case States.idle:
+                    ghostLocationRefTerrain.Vx = 0;
+                    ghostLocationRefTerrain.Vy = 0;
+                    ghostLocationRefTerrain.Vtheta = 0;
+                    break;
+
+                case States.rotation_1:
+                    double ThetaCorrect = Math.Atan2(wayPointLocation.Y - ghostLocationRefTerrain.Y, wayPointLocation.X - ghostLocationRefTerrain.X);
+                    double ThetaStopDistance = Math.Pow(ghostLocationRefTerrain.Vtheta, 2) / (2 * accelAngulaire);
+                    double ThetaRestant = Toolbox.ModuloByAngle(ghostLocationRefTerrain.Theta, ThetaCorrect);
+
+
+                    if (ThetaStopDistance < ThetaRestant)
+                        ghostLocationRefTerrain.Vtheta += accelAngulaire * samplingPeriod;
+                    
+                    if(ThetaStopDistance > ThetaRestant)
+                        ghostLocationRefTerrain.Vtheta -= accelAngulaire * samplingPeriod;
+
+                    break;
+            }
+
+            ghostLocationRefTerrain.Theta += ghostLocationRefTerrain.Vtheta * samplingPeriod;
 
             //On renvoie la position du ghost pour affichage
             OnGhostLocation(robotId, ghostLocationRefTerrain);
@@ -89,6 +134,7 @@ namespace TrajectoryGeneratorNonHolonomeNS
                 PID_Position_Angulaire.ResetPID(0);
             }
         }
+
 
         /*************************************** Outgoing Events ************************************/
 
