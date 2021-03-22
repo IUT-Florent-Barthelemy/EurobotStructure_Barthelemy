@@ -12,7 +12,7 @@ namespace TrajectoryGeneratorNonHolonomeNS
     {
         int robotId;
 
-        double samplingPeriod = 1/50f;
+        double samplingPeriod = 1/50.0;
 
         Location currentLocationRefTerrain;
         Location wayPointLocation;
@@ -33,7 +33,12 @@ namespace TrajectoryGeneratorNonHolonomeNS
             rotation2
         }
 
-        States state = States.rotation_1;
+        States state = States.idle;
+
+        double deadZoneLin = 0.001;
+        double deadZoneTheta = 0.001;
+
+
 
         public TrajectoryGeneratorNonHolonome(int id)
         {
@@ -42,15 +47,15 @@ namespace TrajectoryGeneratorNonHolonomeNS
             InitPositionPID();
 
             //********************************************************SET NEW POSITION
-            wayPointLocation = new Location(1, 2, 0, 0, 0, 0);
+
 
 
             //Initialisation des vitesse et accélérations souhaitées
             accelLineaire = 0.5; //en m.s-2
-            accelAngulaire = 0.5 * Math.PI * 1.0; //en rad.s-2
+            accelAngulaire = 1 * Math.PI * 1.0; //en rad.s-2
 
-            vitesseLineaireMax = 1; //en m.s-1               
-            vitesseAngulaireMax = 1 * Math.PI * 1.0; //en rad.s-1
+            vitesseLineaireMax = 1.5; //en m.s-1               
+            vitesseAngulaireMax = 3 * Math.PI * 1.0; //en rad.s-1
         }
 
         void InitPositionPID()
@@ -68,9 +73,10 @@ namespace TrajectoryGeneratorNonHolonomeNS
             PIDPositionReset();
         }
 
-        public void SetDestination(object sender, LocationArgs destination)
+        public void SetDestination(object sender, PositionArgs destination)
         {
-            wayPointLocation = destination.Location;
+            wayPointLocation.X = destination.X;
+            wayPointLocation.Y = destination.Y;
             state = States.rotation_1;
         }
 
@@ -87,30 +93,83 @@ namespace TrajectoryGeneratorNonHolonomeNS
         void CalculateGhostPosition()
         {
             //A remplir
+
+
             switch(state)
             {
                 case States.idle:
-                    ghostLocationRefTerrain.Vx = 0;
-                    ghostLocationRefTerrain.Vy = 0;
+                    ghostLocationRefTerrain.Vlin = 0;
                     ghostLocationRefTerrain.Vtheta = 0;
                     break;
 
                 case States.rotation_1:
+
+                    ghostLocationRefTerrain.Vlin = 0;
                     double ThetaCorrect = Math.Atan2(wayPointLocation.Y - ghostLocationRefTerrain.Y, wayPointLocation.X - ghostLocationRefTerrain.X);
                     double ThetaStopDistance = Math.Pow(ghostLocationRefTerrain.Vtheta, 2) / (2 * accelAngulaire);
-                    double ThetaRestant = Toolbox.ModuloByAngle(ghostLocationRefTerrain.Theta, ThetaCorrect);
+                    double ThetaRestant = ThetaCorrect - Toolbox.ModuloByAngle(ThetaCorrect, ghostLocationRefTerrain.Theta);//ThetaCorrect - Toolbox.Modulo2PiAngleRad(ghostLocationRefTerrain.Theta);// 
 
 
-                    if (ThetaStopDistance < ThetaRestant)
-                        ghostLocationRefTerrain.Vtheta += accelAngulaire * samplingPeriod;
-                    
-                    if(ThetaStopDistance > ThetaRestant)
-                        ghostLocationRefTerrain.Vtheta -= accelAngulaire * samplingPeriod;
+                    if (ThetaStopDistance < Math.Abs(ThetaRestant)) //acceleration
+                    {
+                        if (Math.Abs(ghostLocationRefTerrain.Vtheta) < vitesseAngulaireMax) //si on n'est pas à vitesse max
+                        {
+                            if (ThetaRestant > 0)
+                                ghostLocationRefTerrain.Vtheta += accelAngulaire * samplingPeriod;
+                            else
+                                ghostLocationRefTerrain.Vtheta -= accelAngulaire * samplingPeriod;
+                        }
+
+                        //ghostLocationRefTerrain.Vtheta = Toolbox.LimitToInterval(ghostLocationRefTerrain.Vtheta, -vitesseAngulaireMax, vitesseAngulaireMax);
+                    }
+
+                    else//deceleration
+                    {
+                        if (ThetaRestant > 0)
+                            ghostLocationRefTerrain.Vtheta -= accelAngulaire * samplingPeriod;
+                        else
+                            ghostLocationRefTerrain.Vtheta += accelAngulaire * samplingPeriod;
+
+                        ghostLocationRefTerrain.Vtheta = Toolbox.LimitToInterval(ghostLocationRefTerrain.Vtheta, -vitesseAngulaireMax, vitesseAngulaireMax);
+                    }
+
+
+                    if (Math.Abs(ThetaRestant) <= Toolbox.DegToRad(0.2))
+                        state = States.linear;
+
+                    break; 
+
+                case States.linear:
+                    ghostLocationRefTerrain.Vtheta = 0;
+                    PointD destinationPoint = new PointD(wayPointLocation.X, wayPointLocation.Y);
+                    PointD ptSeg2 = new PointD(ghostLocationRefTerrain.X + Math.Cos(ghostLocationRefTerrain.Theta), ghostLocationRefTerrain.Y + Math.Sin(ghostLocationRefTerrain.Theta));
+                    PointD ptSeg1 = new PointD(ghostLocationRefTerrain.X, ghostLocationRefTerrain.Y);
+                    double DistanceRestante = Toolbox.ProjectedDistanceOfPointOnLine(destinationPoint, ptSeg1, ptSeg2);
+
+
+                    Console.WriteLine(DistanceRestante);
+                    double stopDistance = Math.Pow(ghostLocationRefTerrain.Vlin, 2) / (2 * accelLineaire);
+
+                    if (DistanceRestante > stopDistance)
+                        ghostLocationRefTerrain.Vlin += accelLineaire * samplingPeriod;
+
+
+                    if (DistanceRestante < stopDistance)
+                        ghostLocationRefTerrain.Vlin -= accelLineaire * samplingPeriod;
+
+                    if (DistanceRestante < deadZoneLin)
+                        state = States.idle;
 
                     break;
             }
 
+            ghostLocationRefTerrain.Vx = ghostLocationRefTerrain.Vlin * Math.Cos(ghostLocationRefTerrain.Theta);
+            ghostLocationRefTerrain.Vy = ghostLocationRefTerrain.Vlin * Math.Sin(ghostLocationRefTerrain.Theta);
+
+            ghostLocationRefTerrain.X += ghostLocationRefTerrain.Vx * samplingPeriod;
+            ghostLocationRefTerrain.Y += ghostLocationRefTerrain.Vy * samplingPeriod;            
             ghostLocationRefTerrain.Theta += ghostLocationRefTerrain.Vtheta * samplingPeriod;
+
 
             //On renvoie la position du ghost pour affichage
             OnGhostLocation(robotId, ghostLocationRefTerrain);

@@ -138,6 +138,50 @@ namespace Utilities
             return distance;            
         }
 
+        public static PointD ProjectedPointOnLine(PointD pt, PointD ptSeg1, PointD ptSeg2)
+        {
+            var A = pt.X - ptSeg1.X;
+            var B = pt.Y - ptSeg1.Y;
+            var C = ptSeg2.X - ptSeg1.X;
+            var D = ptSeg2.Y - ptSeg1.Y;
+
+            double dot = A * C + B * D;
+            double len_sq = C * C + D * D;
+            double param = -1;
+            if (len_sq != 0) //in case of 0 length line
+                param = dot / len_sq;
+
+            double xx, yy;
+            
+            xx = ptSeg1.X + param * C;
+            yy = ptSeg1.Y + param * D;
+
+            return new PointD(xx, yy);
+        }
+
+
+        public static double ProjectedDistanceOfPointOnLine(PointD pt, PointD ptSeg1, PointD ptSeg2)
+        {
+            var A = pt.X - ptSeg1.X;
+            var B = pt.Y - ptSeg1.Y;
+            var C = ptSeg2.X - ptSeg1.X;
+            var D = ptSeg2.Y - ptSeg1.Y;
+
+            double dot = A * C + B * D;
+            double len_sq = C * C + D * D;
+            double param = -1;
+            if (len_sq != 0) //in case of 0 length line
+                param = dot / len_sq;
+
+            double xx, yy;
+
+            xx = ptSeg1.X + param * C;
+            yy = ptSeg1.Y + param * D;
+
+            return Math.Sqrt(Math.Pow(xx - ptSeg1.X, 2) + Math.Pow(yy - ptSeg1.Y, 2));
+        }
+
+
         public static PointD GetInterceptionLocation(Location target, Location hunter, double huntingSpeed)
         {
             //D'après Al-Kashi, si d est la distance entre le pt target et le pt chasseur, que les vitesses sont constantes 

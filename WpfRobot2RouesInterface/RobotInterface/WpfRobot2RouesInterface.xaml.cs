@@ -31,6 +31,10 @@ namespace RobotInterface
             gameMode = gamemode;
             InitializeComponent();
 
+
+            //foward de l'event CtrlClick de LocalWorldMap
+            worldMapDisplayStrategy.OnCtrlClickOnHeatMapEvent += WorldMapDisplayStrategy_OnCtrlClickOnHeatMapEvent;
+
             //Among other settings, this code may be used
             CultureInfo ci = CultureInfo.CurrentUICulture;
 
@@ -117,6 +121,18 @@ namespace RobotInterface
             asserv2WheelsSpeedDisplay.SetTitle("Asservissement Vitesse");
         }
 
+        private void WorldMapDisplayStrategy_OnCtrlClickOnHeatMapEvent(object sender, PositionArgs e)
+        {
+            OnCtrlClickOnLocalWorldMap(e);
+        }
+
+        public event EventHandler<PositionArgs> OnCtrlClickOnLocalWorldMapEvent;
+        public virtual void OnCtrlClickOnLocalWorldMap(PositionArgs e)
+        {
+            OnCtrlClickOnLocalWorldMapEvent?.Invoke(this, e);
+        }
+
+
         void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Decimal)
@@ -174,6 +190,13 @@ namespace RobotInterface
             //    worldMapDisplayWaypoint.UpdateWorldMapDisplay();
             //}));
         }
+
+
+
+
+ 
+
+
 
         public void OnRawLidarDataReceived(object sender, EventArgsLibrary.RawLidarArgs e)
         {
