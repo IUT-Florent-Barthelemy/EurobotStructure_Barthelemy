@@ -109,32 +109,39 @@ namespace TrajectoryGeneratorNonHolonomeNS
                     double ThetaStopDistance = Math.Pow(ghostLocationRefTerrain.Vtheta, 2) / (2 * accelAngulaire);
                     double ThetaRestant = ThetaCorrect - Toolbox.ModuloByAngle(ThetaCorrect, ghostLocationRefTerrain.Theta);//ThetaCorrect - Toolbox.Modulo2PiAngleRad(ghostLocationRefTerrain.Theta);// 
 
+                    
 
                     if (ThetaStopDistance < Math.Abs(ThetaRestant)) //acceleration
                     {
-                        if (Math.Abs(ghostLocationRefTerrain.Vtheta) < vitesseAngulaireMax) //si on n'est pas à vitesse max
-                        {
+                        
                             if (ThetaRestant > 0)
                                 ghostLocationRefTerrain.Vtheta += accelAngulaire * samplingPeriod;
+                                
                             else
                                 ghostLocationRefTerrain.Vtheta -= accelAngulaire * samplingPeriod;
-                        }
 
-                        //ghostLocationRefTerrain.Vtheta = Toolbox.LimitToInterval(ghostLocationRefTerrain.Vtheta, -vitesseAngulaireMax, vitesseAngulaireMax);
+
+                            ghostLocationRefTerrain.Vtheta = Toolbox.LimitToInterval(ghostLocationRefTerrain.Vtheta, -vitesseAngulaireMax, vitesseAngulaireMax);
+
+                            Console.WriteLine(" Erreur {0}", ThetaRestant);
                     }
 
                     else//deceleration
                     {
-                        if (ThetaRestant > 0)
+                        if (ghostLocationRefTerrain.Vtheta > 0)
                             ghostLocationRefTerrain.Vtheta -= accelAngulaire * samplingPeriod;
+
                         else
                             ghostLocationRefTerrain.Vtheta += accelAngulaire * samplingPeriod;
 
                         ghostLocationRefTerrain.Vtheta = Toolbox.LimitToInterval(ghostLocationRefTerrain.Vtheta, -vitesseAngulaireMax, vitesseAngulaireMax);
+                        Console.WriteLine(" Erreur {0}", ThetaRestant);
+
                     }
 
+                    
 
-                    if (Math.Abs(ThetaRestant) <= Toolbox.DegToRad(0.2))
+                    if (Math.Abs(ThetaRestant) < Toolbox.DegToRad(0.2))
                         state = States.linear;
 
                     break; 
@@ -145,10 +152,17 @@ namespace TrajectoryGeneratorNonHolonomeNS
                     PointD ptSeg2 = new PointD(ghostLocationRefTerrain.X + Math.Cos(ghostLocationRefTerrain.Theta), ghostLocationRefTerrain.Y + Math.Sin(ghostLocationRefTerrain.Theta));
                     PointD ptSeg1 = new PointD(ghostLocationRefTerrain.X, ghostLocationRefTerrain.Y);
                     double DistanceRestante = Toolbox.ProjectedDistanceOfPointOnLine(destinationPoint, ptSeg1, ptSeg2);
-
-
-                    Console.WriteLine(DistanceRestante);
                     double stopDistance = Math.Pow(ghostLocationRefTerrain.Vlin, 2) / (2 * accelLineaire);
+
+                    //polarisation de la distance
+                    PointD projPoint = Toolbox.ProjectedPointOnLine(destinationPoint, ptSeg2, ptSeg2);
+                    double value = (destinationPoint.Y - ghostLocationRefTerrain.Y) * (destinationPoint.Y - projPoint.X) + (destinationPoint.X - ghostLocationRefTerrain.X) * (destinationPoint.X - projPoint.X);
+
+                    Console.WriteLine(value);
+
+
+
+
 
                     if (DistanceRestante > stopDistance)
                         ghostLocationRefTerrain.Vlin += accelLineaire * samplingPeriod;
@@ -157,7 +171,7 @@ namespace TrajectoryGeneratorNonHolonomeNS
                     if (DistanceRestante < stopDistance)
                         ghostLocationRefTerrain.Vlin -= accelLineaire * samplingPeriod;
 
-                    if (DistanceRestante < deadZoneLin)
+                    if (DistanceRestante < 0.0001)
                         state = States.idle;
 
                     break;
