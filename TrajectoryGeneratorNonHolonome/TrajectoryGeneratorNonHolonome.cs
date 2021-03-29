@@ -30,7 +30,8 @@ namespace TrajectoryGeneratorNonHolonomeNS
             idle,
             rotation_1,
             linear,
-            rotation2
+            rotation2,
+            fastDeceleration
         }
 
         States state = States.idle;
@@ -90,6 +91,11 @@ namespace TrajectoryGeneratorNonHolonomeNS
             }
         }
 
+
+        bool old_param = false;
+        bool param = false;
+        bool depassement = false;
+
         void CalculateGhostPosition()
         {
             //A remplir
@@ -103,7 +109,12 @@ namespace TrajectoryGeneratorNonHolonomeNS
                     break;
 
                 case States.rotation_1:
-
+                    if(ghostLocationRefTerrain.Vlin >= 0.01)
+                    {
+                        state = States.fastDeceleration;
+                        break;
+                    }
+                        
                     ghostLocationRefTerrain.Vlin = 0;
                     double ThetaCorrect = Math.Atan2(wayPointLocation.Y - ghostLocationRefTerrain.Y, wayPointLocation.X - ghostLocationRefTerrain.X);
                     double ThetaStopDistance = Math.Pow(ghostLocationRefTerrain.Vtheta, 2) / (2 * accelAngulaire);
@@ -122,8 +133,6 @@ namespace TrajectoryGeneratorNonHolonomeNS
 
 
                             ghostLocationRefTerrain.Vtheta = Toolbox.LimitToInterval(ghostLocationRefTerrain.Vtheta, -vitesseAngulaireMax, vitesseAngulaireMax);
-
-                            Console.WriteLine(" Erreur {0}", ThetaRestant);
                     }
 
                     else//deceleration
@@ -135,14 +144,17 @@ namespace TrajectoryGeneratorNonHolonomeNS
                             ghostLocationRefTerrain.Vtheta += accelAngulaire * samplingPeriod;
 
                         ghostLocationRefTerrain.Vtheta = Toolbox.LimitToInterval(ghostLocationRefTerrain.Vtheta, -vitesseAngulaireMax, vitesseAngulaireMax);
-                        Console.WriteLine(" Erreur {0}", ThetaRestant);
 
                     }
 
                     
 
                     if (Math.Abs(ThetaRestant) < Toolbox.DegToRad(0.2))
+                    {
                         state = States.linear;
+                        old_param = (ThetaCorrect > 0) ? (true) : (false); ;
+                    }
+                        
 
                     break; 
 
@@ -155,24 +167,44 @@ namespace TrajectoryGeneratorNonHolonomeNS
                     double stopDistance = Math.Pow(ghostLocationRefTerrain.Vlin, 2) / (2 * accelLineaire);
 
                     //polarisation de la distance
-                    PointD projPoint = Toolbox.ProjectedPointOnLine(destinationPoint, ptSeg2, ptSeg2);
-                    double value = (destinationPoint.Y - ghostLocationRefTerrain.Y) * (destinationPoint.Y - projPoint.X) + (destinationPoint.X - ghostLocationRefTerrain.X) * (destinationPoint.X - projPoint.X);
+                    double Theta1 = Math.Atan2(wayPointLocation.Y - ghostLocationRefTerrain.Y, wayPointLocation.X - ghostLocationRefTerrain.X);
+                    param = (Theta1 > 0) ? (true) : (false);
 
-                    Console.WriteLine(value);
-
-
-
-
-
-                    if (DistanceRestante > stopDistance)
-                        ghostLocationRefTerrain.Vlin += accelLineaire * samplingPeriod;
+                    if (param != old_param)
+                    {
+                        Console.WriteLine("Depassement");
+                        depassement = true;
+                    }
 
 
-                    if (DistanceRestante < stopDistance)
-                        ghostLocationRefTerrain.Vlin -= accelLineaire * samplingPeriod;
+                        if (DistanceRestante > stopDistance)
+                            ghostLocationRefTerrain.Vlin += accelLineaire * samplingPeriod;
+
+
+                        if (DistanceRestante < stopDistance)
+                            ghostLocationRefTerrain.Vlin -= accelLineaire * samplingPeriod;
+
+
 
                     if (DistanceRestante < 0.0001)
+                    {
                         state = States.idle;
+                        depassement = false;
+                        Console.WriteLine("Erreur: {0}", DistanceRestante);
+                    }
+                        
+                     
+                    old_param = param;
+                    break;
+
+                case States.fastDeceleration:
+                    if (ghostLocationRefTerrain.Vlin > 0)
+                        ghostLocationRefTerrain.Vlin -= 2*accelLineaire * samplingPeriod;
+                    else
+                        ghostLocationRefTerrain.Vlin += 2*accelLineaire * samplingPeriod;
+
+                    if (ghostLocationRefTerrain.Vlin <= 0.01)
+                        state = States.rotation_1;
 
                     break;
             }

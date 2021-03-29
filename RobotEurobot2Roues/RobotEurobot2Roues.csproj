@@ -96,6 +96,10 @@
       <Project>{e1eddd83-8dd6-4c4a-9b8e-9d30b53e6fea}</Project>
       <Name>Positioning2Wheels</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RobotSimulator\RobotSimulator.csproj">
+      <Project>{e52bb2b1-480d-46bf-83e6-0f849c051b4b}</Project>
+      <Name>RobotSimulator</Name>
+    </ProjectReference>
     <ProjectReference Include="..\StrategyManagerProjetEtudiant\StrategyManagerProjetEtudiant.csproj">
       <Project>{45B66B72-B07F-4BBD-85F5-DB8A5C438B69}</Project>
       <Name>StrategyManagerProjetEtudiant</Name>

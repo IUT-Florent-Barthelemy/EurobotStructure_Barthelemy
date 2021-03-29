@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrajectoryGeneratorNonHolon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldMapManager", "..\WorldMapManager\WorldMapManager.csproj", "{01E89552-13A5-4A24-80B2-9246700F72FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotSimulator", "..\RobotSimulator\RobotSimulator.csproj", "{E52BB2B1-480D-46BF-83E6-0F849C051B4B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -201,6 +203,14 @@ Global
 		{01E89552-13A5-4A24-80B2-9246700F72FD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{01E89552-13A5-4A24-80B2-9246700F72FD}.Release|x64.ActiveCfg = Release|x64
 		{01E89552-13A5-4A24-80B2-9246700F72FD}.Release|x64.Build.0 = Release|x64
+		{E52BB2B1-480D-46BF-83E6-0F849C051B4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E52BB2B1-480D-46BF-83E6-0F849C051B4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E52BB2B1-480D-46BF-83E6-0F849C051B4B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E52BB2B1-480D-46BF-83E6-0F849C051B4B}.Debug|x64.Build.0 = Debug|Any CPU
+		{E52BB2B1-480D-46BF-83E6-0F849C051B4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E52BB2B1-480D-46BF-83E6-0F849C051B4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E52BB2B1-480D-46BF-83E6-0F849C051B4B}.Release|x64.ActiveCfg = Release|Any CPU
+		{E52BB2B1-480D-46BF-83E6-0F849C051B4B}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

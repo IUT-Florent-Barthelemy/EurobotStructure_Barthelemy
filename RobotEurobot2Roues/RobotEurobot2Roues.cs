@@ -15,11 +15,13 @@ using SciChart.Charting.Visuals;
 using Positioning2WheelsNS;
 using TrajectoryGeneratorNonHolonomeNS;
 using WorldMapManager;
+using RobotSimulator;
 
 namespace RobotEurobot2Roues
 {
     class RobotEurobot2Roues
     {
+        static RobotSim robotSim;
         static USBVendor usbDriver;
         static MsgDecoder msgDecoder;
         static MsgEncoder msgEncoder;
@@ -58,6 +60,7 @@ namespace RobotEurobot2Roues
             localWorldMapManager = new LocalWorldMapManager(robotId, teamId, bypassMulticast: false);
             positioning2Wheels = new Positioning2Wheels(robotId);
             trajectoryGenerator = new TrajectoryGeneratorNonHolonome(robotId);
+            robotSim = new RobotSim(robotId, true, 50);
 
             /// Création des liens entre module, sauf depuis et vers l'interface graphique           
             usbDriver.OnUSBDataReceivedEvent += msgDecoder.DecodeMsgReceived;                                   // Transmission des messages reçus par l'USB au Message Decoder
@@ -78,8 +81,11 @@ namespace RobotEurobot2Roues
             positioning2Wheels.OnCalculatedLocationEvent += localWorldMapManager.OnPhysicalPositionReceived;//Envoi du positionnement calculé au module de génération de trajectoire
             //positioning2Wheels.OnCalculatedLocationEvent += localWorldMapManager.OnGhostLocationReceived;
             trajectoryGenerator.OnGhostLocationEvent += localWorldMapManager.OnGhostLocationReceived;
-            
-            
+
+            robotSim.OnPositionEmulatedEvent += trajectoryGenerator.OnPhysicalPositionReceived;
+
+
+
 
             strategyManager.InitStrategy(); //à faire après avoir abonné les events !
 
