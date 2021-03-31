@@ -39,8 +39,6 @@ namespace TrajectoryGeneratorNonHolonomeNS
         double deadZoneLin = 0.001;
         double deadZoneTheta = 0.001;
 
-
-
         public TrajectoryGeneratorNonHolonome(int id)
         {
             robotId = id;
@@ -61,8 +59,8 @@ namespace TrajectoryGeneratorNonHolonomeNS
 
         void InitPositionPID()
         {
-            PID_Position_Lineaire = new AsservissementPID(20.0, 10.0, 0, 100, 100, 1);
-            PID_Position_Angulaire = new AsservissementPID(20.0, 10.0, 0, 5 * Math.PI, 5 * Math.PI, Math.PI);
+            PID_Position_Lineaire = new AsservissementPID(1, 0, 0, 0.5, 0.5, 0.5);
+            PID_Position_Angulaire = new AsservissementPID(1, 0, 0, Math.PI/2, Math.PI/2, Math.PI/2);
         }
 
         public void InitRobotPosition(double x, double y, double theta)
@@ -152,6 +150,7 @@ namespace TrajectoryGeneratorNonHolonomeNS
                     if (Math.Abs(ThetaRestant) < Toolbox.DegToRad(0.2))
                     {
                         state = States.linear;
+                        depassement = false;
                         old_param = (ThetaCorrect > 0) ? (true) : (false); ;
                     }
                         
@@ -166,27 +165,61 @@ namespace TrajectoryGeneratorNonHolonomeNS
                     double DistanceRestante = Toolbox.ProjectedDistanceOfPointOnLine(destinationPoint, ptSeg1, ptSeg2);
                     double stopDistance = Math.Pow(ghostLocationRefTerrain.Vlin, 2) / (2 * accelLineaire);
 
-                    //polarisation de la distance
-                    double Theta1 = Math.Atan2(wayPointLocation.Y - ghostLocationRefTerrain.Y, wayPointLocation.X - ghostLocationRefTerrain.X);
-                    param = (Theta1 > 0) ? (true) : (false);
+                    //===== Depassement =======
+                    double thetaCible = Math.Atan2(wayPointLocation.Y - ghostLocationRefTerrain.Y, wayPointLocation.X - ghostLocationRefTerrain.X);
+                    double ecartCapCibleRobot = thetaCible - Toolbox.ModuloByAngle(thetaCible, ghostLocationRefTerrain.Theta);
 
-                    if (param != old_param)
+                    bool cibleDevant = true;
+                    if(Math.Abs(ecartCapCibleRobot)>Math.PI/2)
+                        cibleDevant = false;
+
+                    double coeffMajoration = 2;
+
+                    if (cibleDevant)
                     {
-                        Console.WriteLine("Depassement");
-                        depassement = true;
+                        //La vitesse doit impérativement tendre à être positive !
+                        if (ghostLocationRefTerrain.Vlin < 0)
+                        {
+                            //On freine en reculant pour revenir à une vitesse positive
+                            ghostLocationRefTerrain.Vlin += accelLineaire * samplingPeriod;
+                        }
+                        else
+                        {
+                            if (DistanceRestante > stopDistance* coeffMajoration)
+                            {
+                                if (Math.Abs(ghostLocationRefTerrain.Vlin) < vitesseLineaireMax)
+                                    ghostLocationRefTerrain.Vlin += accelLineaire * samplingPeriod;
+                                else
+                                    ;//rien du tout, on est à Vmax
+                            }
+                            else
+                                ghostLocationRefTerrain.Vlin -= accelLineaire * samplingPeriod;
+                        }
+                    }
+                    else
+                    {
+                        //La vitesse doit impérativement tendre à être négative !
+                        if (ghostLocationRefTerrain.Vlin > 0)
+                        {
+                            //On freine en avancant pour revenir à une vitesse négative
+                            ghostLocationRefTerrain.Vlin -= accelLineaire * samplingPeriod;
+                        }
+                        else
+                        {
+                            if (DistanceRestante > stopDistance * coeffMajoration)
+                            {
+                                if (Math.Abs(ghostLocationRefTerrain.Vlin) < vitesseLineaireMax)
+                                    ghostLocationRefTerrain.Vlin -= accelLineaire * samplingPeriod;
+                                else
+                                    ;//rien du tout, on est à Vmax
+                            }
+                            else
+                                ghostLocationRefTerrain.Vlin += accelLineaire * samplingPeriod;
+                        }
                     }
 
 
-                        if (DistanceRestante > stopDistance)
-                            ghostLocationRefTerrain.Vlin += accelLineaire * samplingPeriod;
-
-
-                        if (DistanceRestante < stopDistance)
-                            ghostLocationRefTerrain.Vlin -= accelLineaire * samplingPeriod;
-
-
-
-                    if (DistanceRestante < 0.0001)
+                    if (DistanceRestante < 0.001)
                     {
                         state = States.idle;
                         depassement = false;
@@ -224,11 +257,19 @@ namespace TrajectoryGeneratorNonHolonomeNS
         void PIDPosition()
         {
             //A remplir
-            double vLineaireRobot=0, vAngulaireRobot=0;
-            
-            /// On envoie les vitesses consigne.
-            /// Indispensable en permanence, sinon la sécurité de l'embarqué reset le contrôle moteur
-            /// en l'absence d'orde pendant 200ms
+            //Calcul de l'erreur angulaire
+            double erreurTheta = ghostLocationRefTerrain.Theta - currentLocationRefTerrain.Theta;
+            double vAngulaireRobot = PID_Position_Angulaire.CalculatePDoutput(erreurTheta, samplingPeriod);
+
+            //calcul de l'erreur linéaire
+            PointD GhostPosition = new PointD(ghostLocationRefTerrain.X, ghostLocationRefTerrain.Y);
+            PointD ptSegRobot2 = new PointD(currentLocationRefTerrain.X + Math.Cos(currentLocationRefTerrain.Theta), currentLocationRefTerrain.Y + Math.Sin(currentLocationRefTerrain.Theta));
+            PointD ptSegRobot1 = new PointD(ghostLocationRefTerrain.X, ghostLocationRefTerrain.Y);
+            PointD ProjGhost = Toolbox.ProjectedPointOnLine(GhostPosition, ptSegRobot1, ptSegRobot2);
+            double ErreurLin = Toolbox.Distance(ProjGhost, new PointD(currentLocationRefTerrain.X, currentLocationRefTerrain.Y));
+            double vLineaireRobot = PID_Position_Lineaire.CalculatePDoutput(ErreurLin, samplingPeriod);
+
+            //Si tout c'est bien passé, on envoie les vitesses consigne.
             OnSpeedConsigneToRobot(robotId, (float)vLineaireRobot, (float)vAngulaireRobot);
         }
 

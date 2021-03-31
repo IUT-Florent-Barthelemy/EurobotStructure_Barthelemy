@@ -16,6 +16,10 @@ namespace Utilities
         public static double Max(params double[] values)
             => values.Max();
 
+        /// <summary>Fait le module de deux valeurs.</summary>
+        public static double Module(double val1, double val2)
+            => Math.Sqrt(Math.Pow(val1,2) + Math.Pow(val2, 2));
+
         /// <summary>Converti un angle en degrés en un angle en radians.</summary>
         public static float DegToRad(float angleDeg)
             => angleDeg * (float)Math.PI / 180f;

@@ -38,21 +38,21 @@ namespace StrategyManagerProjetEtudiantNS
             configTimer.Elapsed += ConfigTimer_Elapsed; ;
             configTimer.Start();
 
-            ////Obtenus directement à partir du script Matlab
+            //////Obtenus directement à partir du script Matlab
             //OnOdometryPointToMeter(1.178449e-06);
             //On2WheelsAngleSetup(-1.570796e+00, 1.570796e+00);
             //On2WheelsToPolarSetup(5.000000e-01, -5.000000e-01,
             //                    4.166667e+00, 4.166667e+00);
 
-            //double KpIndependant = 1;
-            //double KiIndependant = 0;
-            ////On envoie périodiquement les réglages du PID de vitesse embarqué
+            //double KpIndependant = 3.0;
+            //double KiIndependant = 100;
+            //////On envoie périodiquement les réglages du PID de vitesse embarqué
             //On2WheelsIndependantSpeedPIDSetup(pM1: KpIndependant, iM1: KiIndependant, 0.0, pM2: KpIndependant, iM2: KiIndependant, 0, 
             //    pM1Limit: 4, iM1Limit: 4, 0, pM2Limit: 4.0, iM2Limit: 4.0, 0);
-            ////On2WheelsPolarSpeedPIDSetup(px: 4.0, ix: 300, 0.0, ptheta: 4.0, itheta: 300, 0,
-            ////    pxLimit: 4.0, ixLimit: 4.0, 0, pthetaLimit: 4.0, ithetaLimit: 4.0, 0);
+            //////On2WheelsPolarSpeedPIDSetup(px: 4.0, ix: 300, 0.0, ptheta: 4.0, itheta: 300, 0,
+            //////    pxLimit: 4.0, ixLimit: 4.0, 0, pthetaLimit: 4.0, ithetaLimit: 4.0, 0);
 
-            //OnSetAsservissementMode((byte)AsservissementMode.Independant);
+            //OnSetAsservissementMode((byte)AsservissementMode.Independant2Wheels);
         }
 
         private void ConfigTimer_Elapsed(object sender, ElapsedEventArgs e)

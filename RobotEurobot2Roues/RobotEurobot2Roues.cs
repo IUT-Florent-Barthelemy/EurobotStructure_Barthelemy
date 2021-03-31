@@ -81,10 +81,24 @@ namespace RobotEurobot2Roues
             positioning2Wheels.OnCalculatedLocationEvent += localWorldMapManager.OnPhysicalPositionReceived;//Envoi du positionnement calculé au module de génération de trajectoire
             //positioning2Wheels.OnCalculatedLocationEvent += localWorldMapManager.OnGhostLocationReceived;
             trajectoryGenerator.OnGhostLocationEvent += localWorldMapManager.OnGhostLocationReceived;
-            
-            trajectoryGenerator.OnSpeedConsigneEvent += robotMsgGenerator.GenerateMessageSetSpeedConsigneToRobot;           //Transmission des commande de vitesse aux moteurs de déplacement
-            strategyManager.OnSetSpeedConsigneToMotorEvent += robotMsgGenerator.GenerateMessageSetSpeedConsigneToMotor;     //Transmission des commande de vitesse (aux moteurs annexes)
-            
+
+            trajectoryGenerator.OnSpeedConsigneEvent += robotMsgGenerator.GenerateMessageSetSpeedConsigneToRobot;
+
+
+            //Evènements liés à l'asservissement
+            strategyManager.OnOdometryPointToMeterSetupEvent += robotMsgGenerator.GenerateMessageOdometryPointToMeter;
+            strategyManager.On2WheelsAngleSetupEvent += robotMsgGenerator.GenerateMessage2WheelsAngleSet;
+            strategyManager.On2WheelsToPolarMatrixSetupEvent += robotMsgGenerator.GenerateMessage2WheelsToPolarMatrixSet;
+            strategyManager.On2WheelsIndependantSpeedPIDSetupEvent += robotMsgGenerator.GenerateMessage2WheelsIndependantSpeedPIDSetup;
+            strategyManager.OnSetAsservissementModeEvent += robotMsgGenerator.GenerateMessageSetAsservissementMode;
+
+
+            //========= TO TEST GHOST WITHOUT USB =============
+            //robotSim.OnPositionEmulatedEvent += trajectoryGenerator.OnPhysicalPositionReceived;
+
+
+
+
             strategyManager.InitStrategy(); //à faire après avoir abonné les events !
 
             StartRobotInterface();
@@ -186,7 +200,7 @@ namespace RobotEurobot2Roues
             }
             else
             {
-                xBoxManette.OnSpeedConsigneEvent -= robotMsgGenerator.GenerateMessageSetSpeedConsigneToRobot; 
+                xBoxManette.OnSpeedConsigneEvent -= robotMsgGenerator.GenerateMessageSetSpeedConsigneToRobot;
                 trajectoryGenerator.OnSpeedConsigneEvent += robotMsgGenerator.GenerateMessageSetSpeedConsigneToRobot;
             }
         }
