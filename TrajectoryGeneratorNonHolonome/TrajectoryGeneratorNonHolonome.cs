@@ -225,9 +225,10 @@ namespace TrajectoryGeneratorNonHolonomeNS
         {
             //A remplir
             double vLineaireRobot=0, vAngulaireRobot=0;
-
-
-            //Si tout c'est bien passé, on envoie les vitesses consigne.
+            
+            /// On envoie les vitesses consigne.
+            /// Indispensable en permanence, sinon la sécurité de l'embarqué reset le contrôle moteur
+            /// en l'absence d'orde pendant 200ms
             OnSpeedConsigneToRobot(robotId, (float)vLineaireRobot, (float)vAngulaireRobot);
         }
 

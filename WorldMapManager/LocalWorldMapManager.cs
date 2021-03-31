@@ -27,9 +27,9 @@ namespace WorldMapManager
             if (localWorldMap == null)
                 return;
             if (localWorldMap.RobotId == e.RobotId)
-            { 
-                localWorldMap.robotLocation = e.Location;
-                OnLocalWorldMapForDisplayOnly(localWorldMap);
+            {
+                localWorldMap.robotLocation = e.Location; //Update de la robot Location dans la local world map
+                OnLocalWorldMapForDisplayOnly(localWorldMap); //Event de transmission de la local world map
             }
         }
 
