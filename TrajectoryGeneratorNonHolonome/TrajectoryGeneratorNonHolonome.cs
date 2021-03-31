@@ -45,10 +45,6 @@ namespace TrajectoryGeneratorNonHolonomeNS
             InitRobotPosition(0, 0, 0);
             InitPositionPID();
 
-            //********************************************************SET NEW POSITION
-
-
-
             //Initialisation des vitesse et accélérations souhaitées
             accelLineaire = 0.5; //en m.s-2
             accelAngulaire = 1 * Math.PI * 1.0; //en rad.s-2
@@ -59,8 +55,8 @@ namespace TrajectoryGeneratorNonHolonomeNS
 
         void InitPositionPID()
         {
-            PID_Position_Lineaire = new AsservissementPID(1, 0, 0, 0.5, 0.5, 0.5);
-            PID_Position_Angulaire = new AsservissementPID(1, 0, 0, Math.PI/2, Math.PI/2, Math.PI/2);
+            PID_Position_Lineaire = new AsservissementPID(10, 5, 0, 0.5, 0.5, 0.5);
+            PID_Position_Angulaire = new AsservissementPID(10, 5, 0, Math.PI/2, Math.PI/2, Math.PI/2);
         }
 
         public void InitRobotPosition(double x, double y, double theta)
@@ -261,12 +257,24 @@ namespace TrajectoryGeneratorNonHolonomeNS
             double erreurTheta = ghostLocationRefTerrain.Theta - currentLocationRefTerrain.Theta;
             double vAngulaireRobot = PID_Position_Angulaire.CalculatePDoutput(erreurTheta, samplingPeriod);
 
-            //calcul de l'erreur linéaire
+            //calcul de l'erreur linéaire ghostLocationRefTerrain currentLocationRefTerrain
             PointD GhostPosition = new PointD(ghostLocationRefTerrain.X, ghostLocationRefTerrain.Y);
             PointD ptSegRobot2 = new PointD(currentLocationRefTerrain.X + Math.Cos(currentLocationRefTerrain.Theta), currentLocationRefTerrain.Y + Math.Sin(currentLocationRefTerrain.Theta));
-            PointD ptSegRobot1 = new PointD(ghostLocationRefTerrain.X, ghostLocationRefTerrain.Y);
+            PointD ptSegRobot1 = new PointD(currentLocationRefTerrain.X, currentLocationRefTerrain.Y);
             PointD ProjGhost = Toolbox.ProjectedPointOnLine(GhostPosition, ptSegRobot1, ptSegRobot2);
-            double ErreurLin = Toolbox.Distance(ProjGhost, new PointD(currentLocationRefTerrain.X, currentLocationRefTerrain.Y));
+
+            double thetaCible = Math.Atan2(ghostLocationRefTerrain.Y - currentLocationRefTerrain.Y, ghostLocationRefTerrain.X - currentLocationRefTerrain.X);
+            double ecartCapCibleRobot = thetaCible - Toolbox.ModuloByAngle(thetaCible, currentLocationRefTerrain.Theta);
+
+
+            int param = 1;
+            if (Math.Abs(ecartCapCibleRobot) > Math.PI / 2)
+                param = -1;
+
+            double ErreurLin = Toolbox.Distance(ProjGhost, new PointD(currentLocationRefTerrain.X, currentLocationRefTerrain.Y)) * param;
+            Console.WriteLine("ErreurLin: {0}", ErreurLin);
+           
+
             double vLineaireRobot = PID_Position_Lineaire.CalculatePDoutput(ErreurLin, samplingPeriod);
 
             //Si tout c'est bien passé, on envoie les vitesses consigne.

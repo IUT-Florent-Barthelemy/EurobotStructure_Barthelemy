@@ -24,13 +24,15 @@ namespace Positioning2WheelsNS
 
         public void OnOdometryRobotSpeedReceived(object sender, PolarSpeedArgs e)
         {
-            ActualLocation.Vx = e.Vx * Math.Cos(e.Vtheta);
-            ActualLocation.Vy = e.Vx * Math.Sin(e.Vtheta);
+            ActualLocation.Theta += ActualLocation.Vtheta * Tech_Sec;
+
+            ActualLocation.Vx = e.Vx * Math.Cos(ActualLocation.Theta);
+            ActualLocation.Vy = e.Vx * Math.Sin(ActualLocation.Theta);
             ActualLocation.Vtheta = e.Vtheta;
 
             ActualLocation.X += ActualLocation.Vx * Tech_Sec;
             ActualLocation.Y += ActualLocation.Vy * Tech_Sec;
-            ActualLocation.Theta += ActualLocation.Vtheta * Tech_Sec;
+            
 
             //Console.WriteLine("Location Vx = {0}", ActualLocation.Vx);
 
