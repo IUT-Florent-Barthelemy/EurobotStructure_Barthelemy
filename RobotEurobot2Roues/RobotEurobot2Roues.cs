@@ -16,6 +16,7 @@ using Positioning2WheelsNS;
 using TrajectoryGeneratorNonHolonomeNS;
 using WorldMapManager;
 using RobotSimulator;
+using PololuControllerNs;
 
 namespace RobotEurobot2Roues
 {
@@ -30,6 +31,7 @@ namespace RobotEurobot2Roues
         static XBoxController xBoxManette;
         static StrategyGenerique strategyManager;
         static LocalWorldMapManager localWorldMapManager;
+        static PololuController pololuController;
 
         static Positioning2Wheels positioning2Wheels;
         static TrajectoryGeneratorNonHolonome trajectoryGenerator;
@@ -61,6 +63,8 @@ namespace RobotEurobot2Roues
             positioning2Wheels = new Positioning2Wheels(robotId);
             trajectoryGenerator = new TrajectoryGeneratorNonHolonome(robotId);
             robotSim = new RobotSim(robotId, true, 50);
+            pololuController = new PololuController();
+
 
             /// Création des liens entre module, sauf depuis et vers l'interface graphique           
             usbDriver.OnUSBDataReceivedEvent += msgDecoder.DecodeMsgReceived;                                   // Transmission des messages reçus par l'USB au Message Decoder
@@ -96,6 +100,7 @@ namespace RobotEurobot2Roues
             //========= TO TEST GHOST WITHOUT USB =============
             //robotSim.OnPositionEmulatedEvent += trajectoryGenerator.OnPhysicalPositionReceived;
 
+            pololuController.UartForwardEvent += robotMsgGenerator.GenerateMessageForwardHerkulex;
 
 
 

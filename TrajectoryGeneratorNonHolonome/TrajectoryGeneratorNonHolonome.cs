@@ -45,8 +45,13 @@ namespace TrajectoryGeneratorNonHolonomeNS
             InitRobotPosition(0, 0, 0);
             InitPositionPID();
 
+            //Test de keenan :)
+            //wayPointLocation = new Location(3.606, 0, 0, 0, 0, 0);
+
+            
+
             //Initialisation des vitesse et accélérations souhaitées
-            accelLineaire = 0.5; //en m.s-2
+            accelLineaire = 1; //en m.s-2
             accelAngulaire = 1 * Math.PI * 1.0; //en rad.s-2
 
             vitesseLineaireMax = 1.5; //en m.s-1               

@@ -92,6 +92,10 @@
       <Project>{AD4884AD-631B-42E4-B6BB-F86B16BD6A68}</Project>
       <Name>MessageProcessor</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PololuController\PololuController.csproj">
+      <Project>{63ace674-16eb-467a-be61-2964af9e7d95}</Project>
+      <Name>PololuController</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Positioning2Wheels\Positioning2Wheels.csproj">
       <Project>{e1eddd83-8dd6-4c4a-9b8e-9d30b53e6fea}</Project>
       <Name>Positioning2Wheels</Name>
